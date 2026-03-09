@@ -47,10 +47,17 @@ void loop() {
     int gx = map(x, 0, 320, 0, 27);
     int gy = map(y, 0, 240, 0, 27);
 
-    if(gx >= 0 && gx < 28 && gy >= 0 && gy < 28){
-      grid[gy][gx] = 1;
-    }
+    // --- remplissage "plus gras" ---
+    for(int dy = -1; dy <= 1; dy++){
+      for(int dx = -1; dx <= 1; dx++){
+        int nx = gx + dx;
+        int ny = gy + dy;
 
+        if(nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE){
+          grid[ny][nx] = 1;
+        }
+      }
+    }
 
   } else if(drawing) {
 
