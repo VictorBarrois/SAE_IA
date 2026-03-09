@@ -2,71 +2,83 @@
 
 M5GFX display;
 
-void setup(void)
-{
-  display.init();
-  display.setFont(&fonts::Font4);
+#define GRID_SIZE 28
 
-  if (!display.touch())
-  {
-    display.setTextDatum(textdatum_t::middle_center);
-    display.drawString("Touch not found.", display.width() / 2, display.height() / 2);
+int grid[GRID_SIZE][GRID_SIZE];
+
+void printGrid();  // prototype pour afficher la grille
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Programme démarre");
+
+  display.init();
+  display.startWrite();
+
+  // Fond noir
+  display.fillScreen(TFT_BLACK);
+
+  // Initialiser la grille
+  for(int y = 0; y < GRID_SIZE; y++){
+    for(int x = 0; x < GRID_SIZE; x++){
+      grid[y][x] = 0;
+    }
   }
 
-  display.setEpdMode(epd_mode_t::epd_fastest);
-  display.startWrite();
+  Serial.println("Grille initialisée");
 }
 
-void loop(void)
-{
-  static bool drawed = false;
-  lgfx::touch_point_t tp[3];
+void loop() {
+  lgfx::touch_point_t tp[1];
+  int nums = display.getTouchRaw(tp, 1);
 
-  int nums = display.getTouchRaw(tp, 3);
-  if (nums)
-  {
-    for (int i = 0; i < nums; ++i)
-    {
-      display.setCursor(16, 16 + i * 24);
-      display.printf("Raw X:%03d  Y:%03d", tp[i].x, tp[i].y);
+  static bool drawing = false; // savoir si on était en train de dessiner
+
+  if(nums) { // le doigt est sur l'écran
+    drawing = true;
+
+    int x = tp[0].x;
+    int y = tp[0].y;
+
+    // dessiner sur l'écran en blanc
+    display.fillCircle(x, y, 4, TFT_WHITE);
+
+    // conversion 320x240 -> 28x28
+    int gx = map(x, 0, 320, 0, 27);
+    int gy = map(y, 0, 240, 0, 27);
+
+    if(gx >= 0 && gx < 28 && gy >= 0 && gy < 28){
+      grid[gy][gx] = 1;
     }
 
-    display.convertRawXY(tp, nums);
 
-    for (int i = 0; i < nums; ++i)
-    {
-      display.setCursor(16, 128 + i * 24);
-      display.printf("Convert X:%03d  Y:%03d", tp[i].x, tp[i].y);
-    }
-    display.display();
+  } else if(drawing) {
 
-    display.setColor(display.isEPD() ? TFT_BLACK : TFT_WHITE);
-    for (int i = 0; i < nums; ++i)
-    {
-      int s = tp[i].size + 3;
-      switch (tp[i].id)
-      {
-      case 0:
-        display.fillCircle(tp[i].x, tp[i].y, s);
-        break;
-      case 1:
-        display.drawLine(tp[i].x-s, tp[i].y-s, tp[i].x+s, tp[i].y+s);
-        display.drawLine(tp[i].x-s, tp[i].y+s, tp[i].x+s, tp[i].y-s);
-        break;
-      default:
-        display.fillTriangle(tp[i].x-s, tp[i].y +s, tp[i].x+s, tp[i].y+s, tp[i].x, tp[i].y-s);
-        break;
+    // afficher la grille dans le terminal à chaque point
+    printGrid();
+
+    // le doigt a été retiré → réinitialiser écran et grille
+    drawing = false;
+
+    display.fillScreen(TFT_BLACK); // écran noir
+    for(int y = 0; y < GRID_SIZE; y++){
+      for(int x = 0; x < GRID_SIZE; x++){
+        grid[y][x] = 0; // grille remise à zéro
       }
-      display.display();
     }
-    drawed = true;
+
+    Serial.println("Dessin terminé --> Doigt relâché");
   }
-  else if (drawed)
-  {
-    drawed = false;
-    display.waitDisplay();
-    display.clear();
-    display.display();
+}
+
+void printGrid() {
+  Serial.println("===================== GRID 28x28 ======================");
+  for(int y = 0; y < GRID_SIZE; y++){
+    for(int x = 0; x < GRID_SIZE; x++){
+      Serial.print(grid[y][x]);
+      Serial.print(" ");
+    }
+    Serial.println();
   }
-  vTaskDelay(1);
+  Serial.println("=======================================================");
 }
