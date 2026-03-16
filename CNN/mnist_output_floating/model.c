@@ -19,19 +19,19 @@ extern "C" {
  // InputLayer is excluded
 #include "conv2d_5.c"
 #include "weights/conv2d_5.c" // InputLayer is excluded
-#include "max_pooling2d_4.c" // InputLayer is excluded
+#include "max_pooling2d_2.c" // InputLayer is excluded
 #include "conv2d_6.c"
 #include "weights/conv2d_6.c" // InputLayer is excluded
-#include "max_pooling2d_5.c" // InputLayer is excluded
-#include "flatten_2.c" // InputLayer is excluded
-#include "dense_4.c"
-#include "weights/dense_4.c"
+#include "max_pooling2d_3.c" // InputLayer is excluded
+#include "flatten_1.c" // InputLayer is excluded
+#include "dense_2.c"
+#include "weights/dense_2.c"
 #endif
 
 
 void cnn(
   const input_t input,
-  dense_4_output_type dense_4_output) {
+  dense_2_output_type dense_2_output) {
   
   // Output array allocation
   static union {
@@ -40,9 +40,9 @@ void cnn(
   } activations1;
 
   static union {
-    max_pooling2d_4_output_type max_pooling2d_4_output;
-    max_pooling2d_5_output_type max_pooling2d_5_output;
-    flatten_2_output_type flatten_2_output;
+    max_pooling2d_2_output_type max_pooling2d_2_output;
+    max_pooling2d_3_output_type max_pooling2d_3_output;
+    flatten_1_output_type flatten_1_output;
   } activations2;
 
 
@@ -57,37 +57,37 @@ void cnn(
     );
   
   
-  max_pooling2d_4(
+  max_pooling2d_2(
     activations1.conv2d_5_output,
-    activations2.max_pooling2d_4_output
+    activations2.max_pooling2d_2_output
     );
   
   
   conv2d_6(
-    activations2.max_pooling2d_4_output,
+    activations2.max_pooling2d_2_output,
     conv2d_6_kernel,
     conv2d_6_bias,
     activations1.conv2d_6_output
     );
   
   
-  max_pooling2d_5(
+  max_pooling2d_3(
     activations1.conv2d_6_output,
-    activations2.max_pooling2d_5_output
+    activations2.max_pooling2d_3_output
     );
   
   
-  flatten_2(
-    activations2.max_pooling2d_5_output,
-    activations2.flatten_2_output
+  flatten_1(
+    activations2.max_pooling2d_3_output,
+    activations2.flatten_1_output
     );
   
   
-  dense_4(
-    activations2.flatten_2_output,
-    dense_4_kernel,
-    dense_4_bias,// Last layer uses output passed as model parameter
-    dense_4_output
+  dense_2(
+    activations2.flatten_1_output,
+    dense_2_kernel,
+    dense_2_bias,// Last layer uses output passed as model parameter
+    dense_2_output
     );
 }
 

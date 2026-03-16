@@ -1,4 +1,6 @@
 #include <M5GFX.h>
+#include <../CNN/mnist_float32.h>
+#include <math.h>
 
 M5GFX display;
 
@@ -6,19 +8,49 @@ M5GFX display;
 
 int grid[GRID_SIZE][GRID_SIZE];
 
-void printGrid();  // prototype pour afficher la grille
+void printGrid();
+void runCNN();
 
+
+// =====================================================
+// SOFTMAX (stable numériquement)
+// =====================================================
+void softmax(float *input, float *output, int size) {
+
+  float maxVal = input[0];
+
+  // trouver le max
+  for(int i = 1; i < size; i++){
+    if(input[i] > maxVal) maxVal = input[i];
+  }
+
+  // exp + somme
+  float sum = 0.0f;
+  for(int i = 0; i < size; i++){
+    output[i] = expf(input[i] - maxVal);
+    sum += output[i];
+  }
+
+  // normalisation
+  for(int i = 0; i < size; i++){
+    output[i] /= sum;
+  }
+}
+
+
+// =====================================================
+// SETUP
+// =====================================================
 void setup() {
+
   Serial.begin(115200);
   Serial.println("Programme démarre");
 
   display.init();
   display.startWrite();
-
-  // Fond noir
   display.fillScreen(TFT_BLACK);
 
-  // Initialiser la grille
+  // init grille
   for(int y = 0; y < GRID_SIZE; y++){
     for(int x = 0; x < GRID_SIZE; x++){
       grid[y][x] = 0;
@@ -28,28 +60,35 @@ void setup() {
   Serial.println("Grille initialisée");
 }
 
+
+// =====================================================
+// LOOP : dessin tactile
+// =====================================================
 void loop() {
+
   lgfx::touch_point_t tp[1];
   int nums = display.getTouchRaw(tp, 1);
 
-  static bool drawing = false; // savoir si on était en train de dessiner
+  static bool drawing = false;
 
-  if(nums) { // le doigt est sur l'écran
+  if(nums) {
+
     drawing = true;
 
     int x = tp[0].x;
     int y = tp[0].y;
 
-    // dessiner sur l'écran en blanc
+    // dessiner sur écran
     display.fillCircle(x, y, 4, TFT_WHITE);
 
-    // conversion 320x240 -> 28x28
+    // écran -> grille
     int gx = map(x, 0, 320, 0, 27);
     int gy = map(y, 0, 240, 0, 27);
 
-    // --- remplissage "plus gras" ---
+    // épaissir le trait
     for(int dy = -1; dy <= 1; dy++){
       for(int dx = -1; dx <= 1; dx++){
+
         int nx = gx + dx;
         int ny = gy + dy;
 
@@ -59,18 +98,23 @@ void loop() {
       }
     }
 
-  } else if(drawing) {
+  } 
+  else if(drawing) {
 
-    // afficher la grille dans le terminal à chaque point
+    // doigt relâché
+
     printGrid();
+    runCNN();
 
-    // le doigt a été retiré → réinitialiser écran et grille
     drawing = false;
 
-    display.fillScreen(TFT_BLACK); // écran noir
+    // reset écran
+    display.fillScreen(TFT_BLACK);
+
+    // reset grille
     for(int y = 0; y < GRID_SIZE; y++){
       for(int x = 0; x < GRID_SIZE; x++){
-        grid[y][x] = 0; // grille remise à zéro
+        grid[y][x] = 0;
       }
     }
 
@@ -78,8 +122,67 @@ void loop() {
   }
 }
 
+
+// =====================================================
+//  EXECUTION CNN + SOFTMAX
+// =====================================================
+void runCNN() {
+
+  input_t input;
+  dense_2_output_type output;
+
+  // grid -> input CNN
+  for(int y = 0; y < 28; y++){
+    for(int x = 0; x < 28; x++){
+      input[y][x][0] = grid[y][x] ? 1.0f : 0.0f;
+    }
+  }
+
+  // exécution réseau
+  cnn(input, output);
+
+  // Softmax
+  float probs[10];
+  softmax(output, probs, 10);
+
+  // trouver classe la plus probable
+  int predicted = 0;
+  float maxVal = probs[0];
+
+  for(int i = 1; i < 10; i++){
+    if(probs[i] > maxVal){
+      maxVal = probs[i];
+      predicted = i;
+    }
+  }
+
+  // ================= AFFICHAGE =================
+
+  Serial.println("================ RESULTAT CNN ================");
+
+  Serial.print("Chiffre reconnu : ");
+  Serial.println(predicted);
+
+  Serial.println("Probabilités (softmax) :");
+
+  for(int i = 0; i < 10; i++){
+    Serial.print(i);
+    Serial.print(" : ");
+    Serial.print(probs[i]*100, 5);
+    Serial.println(" % ");
+  }
+
+  Serial.println("================================================");
+}
+
+
+// =====================================================
+// DEBUG : affichage grille
+// =====================================================
 void printGrid() {
-  Serial.println("===================== GRID 28x28 ======================");
+
+  Serial.println("================ GRID 28x28 ================");
+
   for(int y = 0; y < GRID_SIZE; y++){
     for(int x = 0; x < GRID_SIZE; x++){
       Serial.print(grid[y][x]);
@@ -87,5 +190,6 @@ void printGrid() {
     }
     Serial.println();
   }
-  Serial.println("=======================================================");
+
+  Serial.println("==============================================");
 }
