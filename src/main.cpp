@@ -129,7 +129,7 @@ void loop() {
 void runCNN() {
 
   input_t input;
-  dense_2_output_type output;
+  dense_47_output_type output;
 
   // grid -> input CNN
   for(int y = 0; y < 28; y++){
@@ -160,9 +160,6 @@ void runCNN() {
 
   Serial.println("================ RESULTAT CNN ================");
 
-  Serial.print("Chiffre reconnu : ");
-  Serial.println(predicted);
-
   Serial.println("Probabilités (softmax) :");
 
   for(int i = 0; i < 10; i++){
@@ -171,6 +168,9 @@ void runCNN() {
     Serial.print(probs[i]*100, 5);
     Serial.println(" % ");
   }
+
+  Serial.print("Chiffre reconnu : ");
+  Serial.println(predicted);
 
   Serial.println("================================================");
 }

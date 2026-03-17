@@ -18,7 +18,7 @@
 #include "riscv_nnfunctions.h"
 #endif
 
-#define INPUT_SAMPLES 400
+#define INPUT_SAMPLES 800
 #define FC_UNITS 100
 #define ACTIVATION_RELU
 

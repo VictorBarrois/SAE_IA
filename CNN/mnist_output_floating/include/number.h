@@ -50,39 +50,6 @@ typedef enum {
 // typedef  number_t;		// Standard size numeric type used for weights and activations
 // typedef  long_number_t;	// Long numeric type used for intermediate results
 
-#define NUMBER_MIN_FLOAT -2147483648
-#define NUMBER_MAX_FLOAT 2147483647
-
-static inline float min_float(
-    float a,
-    float b) {
-	if (a <= b)
-		return a;
-	return b;
-}
-
-static inline float max_float(
-    float a,
-    float b) {
-	if (a >= b)
-		return a;
-	return b;
-}
-
-static inline float scale_number_t_float(
-  float number, int scale_factor, round_mode_t round_mode) {
-	return number;
-}
-static inline float clamp_to_number_t_float(
-  float number) {
-	return (float) number;
-}
-static inline float scale_and_clamp_to_number_t_float(
-  float number, int scale_factor, round_mode_t round_mode) {
-	return (float) number;
-}
-
-
 #define NUMBER_MIN_INT32_T -2147483648
 #define NUMBER_MAX_INT32_T 2147483647
 
@@ -152,6 +119,39 @@ static inline int32_t scale_and_clamp_to_number_t_int32_t(
   return clamp_to_number_t_int32_t(number);
 #endif
 }
+
+#define NUMBER_MIN_FLOAT -2147483648
+#define NUMBER_MAX_FLOAT 2147483647
+
+static inline float min_float(
+    float a,
+    float b) {
+	if (a <= b)
+		return a;
+	return b;
+}
+
+static inline float max_float(
+    float a,
+    float b) {
+	if (a >= b)
+		return a;
+	return b;
+}
+
+static inline float scale_number_t_float(
+  float number, int scale_factor, round_mode_t round_mode) {
+	return number;
+}
+static inline float clamp_to_number_t_float(
+  float number) {
+	return (float) number;
+}
+static inline float scale_and_clamp_to_number_t_float(
+  float number, int scale_factor, round_mode_t round_mode) {
+	return (float) number;
+}
+
 
 
 

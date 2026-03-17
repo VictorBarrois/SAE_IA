@@ -17,77 +17,72 @@ extern "C" {
 // #include <chrono>
 
  // InputLayer is excluded
-#include "conv2d_5.c"
-#include "weights/conv2d_5.c" // InputLayer is excluded
-#include "max_pooling2d_2.c" // InputLayer is excluded
-#include "conv2d_6.c"
-#include "weights/conv2d_6.c" // InputLayer is excluded
-#include "max_pooling2d_3.c" // InputLayer is excluded
-#include "flatten_1.c" // InputLayer is excluded
-#include "dense_2.c"
-#include "weights/dense_2.c"
+#include "conv2d_141.c"
+#include "weights/conv2d_141.c" // InputLayer is excluded
+#include "conv2d_142.c"
+#include "weights/conv2d_142.c" // InputLayer is excluded
+#include "flatten_24.c" // InputLayer is excluded
+#include "dense_46.c"
+#include "weights/dense_46.c" // InputLayer is excluded
+#include "dense_47.c"
+#include "weights/dense_47.c"
 #endif
 
 
 void cnn(
   const input_t input,
-  dense_2_output_type dense_2_output) {
+  dense_47_output_type dense_47_output) {
   
   // Output array allocation
   static union {
-    conv2d_5_output_type conv2d_5_output;
-    conv2d_6_output_type conv2d_6_output;
+    conv2d_141_output_type conv2d_141_output;
+    dense_46_output_type dense_46_output;
   } activations1;
 
   static union {
-    max_pooling2d_2_output_type max_pooling2d_2_output;
-    max_pooling2d_3_output_type max_pooling2d_3_output;
-    flatten_1_output_type flatten_1_output;
+    conv2d_142_output_type conv2d_142_output;
+    flatten_24_output_type flatten_24_output;
   } activations2;
 
 
 // Model layers call chain 
   
   
-  conv2d_5( // Model input is passed as model parameter
+  conv2d_141( // Model input is passed as model parameter
     input,
-    conv2d_5_kernel,
-    conv2d_5_bias,
-    activations1.conv2d_5_output
+    conv2d_141_kernel,
+    conv2d_141_bias,
+    activations1.conv2d_141_output
     );
   
   
-  max_pooling2d_2(
-    activations1.conv2d_5_output,
-    activations2.max_pooling2d_2_output
+  conv2d_142(
+    activations1.conv2d_141_output,
+    conv2d_142_kernel,
+    conv2d_142_bias,
+    activations2.conv2d_142_output
     );
   
   
-  conv2d_6(
-    activations2.max_pooling2d_2_output,
-    conv2d_6_kernel,
-    conv2d_6_bias,
-    activations1.conv2d_6_output
+  flatten_24(
+    activations2.conv2d_142_output,
+    activations2.flatten_24_output
     );
   
   
-  max_pooling2d_3(
-    activations1.conv2d_6_output,
-    activations2.max_pooling2d_3_output
+  dense_46(
+    activations2.flatten_24_output,
+    dense_46_kernel,
+    dense_46_bias,
+    activations1.dense_46_output
     );
   
   
-  flatten_1(
-    activations2.max_pooling2d_3_output,
-    activations2.flatten_1_output
-    );
-  
-  
-  dense_2(
-    activations2.flatten_1_output,
-    dense_2_kernel,
-    dense_2_bias,// Last layer uses output passed as model parameter
-    dense_2_output
+  dense_47(
+    activations1.dense_46_output,
+    dense_47_kernel,
+    dense_47_bias,// Last layer uses output passed as model parameter
+    dense_47_output
     );
 }
 

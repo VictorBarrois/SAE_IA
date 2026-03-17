@@ -18,10 +18,10 @@
 #include "riscv_nnfunctions.h"
 #endif
 
-#define INPUT_CHANNELS      1
-#define INPUT_HEIGHT        28
-#define INPUT_WIDTH         28
-#define CONV_FILTERS        8
+#define INPUT_CHANNELS      16
+#define INPUT_HEIGHT        13
+#define INPUT_WIDTH         13
+#define CONV_FILTERS        32
 #define CONV_KERNEL_SIZE_Y  3
 #define CONV_KERNEL_SIZE_X  3
 #define CONV_STRIDE_Y       1
