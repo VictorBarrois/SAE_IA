@@ -17,72 +17,72 @@ extern "C" {
 // #include <chrono>
 
  // InputLayer is excluded
-#include "conv2d_141.c"
-#include "weights/conv2d_141.c" // InputLayer is excluded
-#include "conv2d_142.c"
-#include "weights/conv2d_142.c" // InputLayer is excluded
-#include "flatten_24.c" // InputLayer is excluded
-#include "dense_46.c"
-#include "weights/dense_46.c" // InputLayer is excluded
-#include "dense_47.c"
-#include "weights/dense_47.c"
+#include "conv2d_148.c"
+#include "weights/conv2d_148.c" // InputLayer is excluded
+#include "conv2d_149.c"
+#include "weights/conv2d_149.c" // InputLayer is excluded
+#include "flatten_26.c" // InputLayer is excluded
+#include "dense_50.c"
+#include "weights/dense_50.c" // InputLayer is excluded
+#include "dense_51.c"
+#include "weights/dense_51.c"
 #endif
 
 
 void cnn(
   const input_t input,
-  dense_47_output_type dense_47_output) {
+  dense_51_output_type dense_51_output) {
   
   // Output array allocation
   static union {
-    conv2d_141_output_type conv2d_141_output;
-    dense_46_output_type dense_46_output;
+    conv2d_148_output_type conv2d_148_output;
+    dense_50_output_type dense_50_output;
   } activations1;
 
   static union {
-    conv2d_142_output_type conv2d_142_output;
-    flatten_24_output_type flatten_24_output;
+    conv2d_149_output_type conv2d_149_output;
+    flatten_26_output_type flatten_26_output;
   } activations2;
 
 
 // Model layers call chain 
   
   
-  conv2d_141( // Model input is passed as model parameter
+  conv2d_148( // Model input is passed as model parameter
     input,
-    conv2d_141_kernel,
-    conv2d_141_bias,
-    activations1.conv2d_141_output
+    conv2d_148_kernel,
+    conv2d_148_bias,
+    activations1.conv2d_148_output
     );
   
   
-  conv2d_142(
-    activations1.conv2d_141_output,
-    conv2d_142_kernel,
-    conv2d_142_bias,
-    activations2.conv2d_142_output
+  conv2d_149(
+    activations1.conv2d_148_output,
+    conv2d_149_kernel,
+    conv2d_149_bias,
+    activations2.conv2d_149_output
     );
   
   
-  flatten_24(
-    activations2.conv2d_142_output,
-    activations2.flatten_24_output
+  flatten_26(
+    activations2.conv2d_149_output,
+    activations2.flatten_26_output
     );
   
   
-  dense_46(
-    activations2.flatten_24_output,
-    dense_46_kernel,
-    dense_46_bias,
-    activations1.dense_46_output
+  dense_50(
+    activations2.flatten_26_output,
+    dense_50_kernel,
+    dense_50_bias,
+    activations1.dense_50_output
     );
   
   
-  dense_47(
-    activations1.dense_46_output,
-    dense_47_kernel,
-    dense_47_bias,// Last layer uses output passed as model parameter
-    dense_47_output
+  dense_51(
+    activations1.dense_50_output,
+    dense_51_kernel,
+    dense_51_bias,// Last layer uses output passed as model parameter
+    dense_51_output
     );
 }
 
