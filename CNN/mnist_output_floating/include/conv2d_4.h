@@ -17,11 +17,11 @@
 #define INPUT_CHANNELS      1
 #define INPUT_HEIGHT        28
 #define INPUT_WIDTH         28
-#define CONV_FILTERS        16
+#define CONV_FILTERS        32
 #define CONV_KERNEL_SIZE_Y  3
 #define CONV_KERNEL_SIZE_X  3
-#define CONV_STRIDE_Y       1
-#define CONV_STRIDE_X       1
+#define CONV_STRIDE_Y       2
+#define CONV_STRIDE_X       2
 
 #define ZEROPADDING_TOP    0
 #define ZEROPADDING_BOTTOM 0

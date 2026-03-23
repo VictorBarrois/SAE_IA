@@ -12,7 +12,7 @@
 #include "number.h"
 #endif
 
-#define INPUT_CHANNELS  16
+#define INPUT_CHANNELS  128
 #define INPUT_HEIGHT    11
 #define INPUT_WIDTH     11
 #define POOL_SIZE_Y     2

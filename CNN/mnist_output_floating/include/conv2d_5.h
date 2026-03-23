@@ -14,14 +14,14 @@
 #include "number.h"
 #endif
 
-#define INPUT_CHANNELS      16
+#define INPUT_CHANNELS      32
 #define INPUT_HEIGHT        13
 #define INPUT_WIDTH         13
-#define CONV_FILTERS        32
+#define CONV_FILTERS        64
 #define CONV_KERNEL_SIZE_Y  3
 #define CONV_KERNEL_SIZE_X  3
-#define CONV_STRIDE_Y       1
-#define CONV_STRIDE_X       1
+#define CONV_STRIDE_Y       2
+#define CONV_STRIDE_X       2
 
 #define ZEROPADDING_TOP    0
 #define ZEROPADDING_BOTTOM 0

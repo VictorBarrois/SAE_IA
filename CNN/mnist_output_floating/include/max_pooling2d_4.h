@@ -15,8 +15,8 @@
 #endif
 
 #define INPUT_CHANNELS  32
-#define INPUT_HEIGHT    11
-#define INPUT_WIDTH     11
+#define INPUT_HEIGHT    26
+#define INPUT_WIDTH     26
 #define POOL_SIZE_Y     2
 #define POOL_SIZE_X     2
 #define POOL_STRIDE_Y   2

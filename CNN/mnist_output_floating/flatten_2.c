@@ -12,13 +12,13 @@
 #include "number.h"
 #endif
 
-#define OUTPUT_DIM 800
+#define OUTPUT_DIM 3200
 
 #define NUMBER_T float
 #define LONG_NUMBER_T float
 
 static inline void flatten_2(
-  const NUMBER_T input[5][5][32], 			      // IN
+  const NUMBER_T input[5][5][128], 			      // IN
 	NUMBER_T output[OUTPUT_DIM]) {			                // OUT
 
   NUMBER_T *input_flat = (NUMBER_T *)input;

@@ -18,14 +18,14 @@
 #include "riscv_nnfunctions.h"
 #endif
 
-#define INPUT_CHANNELS      8
-#define INPUT_HEIGHT        13
-#define INPUT_WIDTH         13
-#define CONV_FILTERS        16
+#define INPUT_CHANNELS      64
+#define INPUT_HEIGHT        6
+#define INPUT_WIDTH         6
+#define CONV_FILTERS        128
 #define CONV_KERNEL_SIZE_Y  3
 #define CONV_KERNEL_SIZE_X  3
-#define CONV_STRIDE_Y       1
-#define CONV_STRIDE_X       1
+#define CONV_STRIDE_Y       2
+#define CONV_STRIDE_X       2
 #define CONV_GROUPS         1
 #define CHANNELS_PER_GROUP  (INPUT_CHANNELS / CONV_GROUPS)
 #define FILTERS_PER_GROUP   (CONV_FILTERS / CONV_GROUPS)
