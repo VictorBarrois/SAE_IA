@@ -1,5 +1,5 @@
 #include <M5GFX.h>
-#include <../CNN/mnist_fixed_int16.h>
+#include <../CNN/mnist_fixed_int8.h>
 #include <math.h>
 #include <WiFi.h>
 #include <stdint.h>
@@ -10,32 +10,23 @@ M5GFX display;
 #define TEXT_SIZE 2
 
 // =====================================================
-// PARAMETRES PTQ A AJUSTER SELON TON MODELE
+// PARAMETRES PTQ A AJUSTER SELON TON MODELE INT8
 // =====================================================
 //
-// Exemple classique si l'entrée réelle est normalisée entre 0.0 et 1.0
-// et quantifiée en int8 : q = round(real / scale) + zero_point
+// Hypothèse simple : entrée réelle dans [0,1]
+// quantifiée vers int8 signé.
 //
-// Ici je mets des valeurs d'exemple.
-// Tu dois idéalement remplacer avec les vraies valeurs du modèle exporté.
+// q = round(real / scale) + zero_point
 //
-static const float INPUT_SCALE = 1.0f / 255.0f;   // exemple PTQ
-static const int   INPUT_ZERO_POINT = 0;          // exemple PTQ
+static const float INPUT_SCALE = 1.0f / 255.0f;
+static const int   INPUT_ZERO_POINT = -128;   // souvent utile pour exploiter toute la plage int8
 
-// Si ton modèle attend du int8 signé : plage [-128,127]
-// Si ton modèle attend du uint8 : plage [0,255]
-// Si ton modèle attend du int16 : il faudra adapter le clamp.
-// Ici on suppose une entrée signée compacte.
 static const int INPUT_QMIN = -128;
 static const int INPUT_QMAX = 127;
 
 // =====================================================
-// GRILLE QUANTIFIEE
+// GRILLE
 // =====================================================
-//
-// 0   = noir
-// 255 = blanc
-//
 uint8_t grid[GRID_SIZE][GRID_SIZE];
 
 // WiFi AP + serveur TCP
@@ -55,34 +46,31 @@ void sendLine(const String& msg);
 void sendText(const String& msg);
 
 // Quantification PTQ
-int quantize_input_u8_to_model(uint8_t pixel);
-void softmaxFromInt16(const int16_t *input, float *output, int size);
+int8_t quantize_input_u8_to_model(uint8_t pixel);
+void softmaxFromInt8(const int8_t *input, float *output, int size);
 
 // =====================================================
-// QUANTIFICATION PTQ
+// QUANTIFICATION PTQ INT8
 // =====================================================
 //
-// pixel est en [0..255]
-// on le ramène en réel [0..1] puis quantification PTQ:
+// pixel en [0..255]
+// real_value en [0..1]
 //
-// real_value = pixel / 255.0
-// q = round(real_value / INPUT_SCALE) + INPUT_ZERO_POINT
-//
-int quantize_input_u8_to_model(uint8_t pixel) {
+int8_t quantize_input_u8_to_model(uint8_t pixel) {
   float real_value = (float)pixel / 255.0f;
   int q = (int)roundf(real_value / INPUT_SCALE) + INPUT_ZERO_POINT;
 
   if (q < INPUT_QMIN) q = INPUT_QMIN;
   if (q > INPUT_QMAX) q = INPUT_QMAX;
 
-  return q;
+  return (int8_t)q;
 }
 
 // =====================================================
-// SOFTMAX SUR SORTIE INT16
+// SOFTMAX SUR SORTIE INT8
 // =====================================================
-void softmaxFromInt16(const int16_t *input, float *output, int size) {
-  int16_t maxVal = input[0];
+void softmaxFromInt8(const int8_t *input, float *output, int size) {
+  int8_t maxVal = input[0];
   for (int i = 1; i < size; i++) {
     if (input[i] > maxVal) {
       maxVal = input[i];
@@ -200,19 +188,11 @@ void runCNN(unsigned long preprocessing_us) {
   dense_5_output_type output;
 
   // -------------------------------------------------
-  // Remplissage de l'entrée quantifiée
+  // Remplissage de l'entrée quantifiée INT8
   // -------------------------------------------------
-  //
-  // ATTENTION :
-  // cette affectation suppose que input_t accepte un entier
-  // compatible avec le type généré dans mnist_fixed_int16.h
-  //
-  // Si ton input_t est int8_t, uint8_t, int16_t : ça ira.
-  // Sinon il faudra adapter précisément le cast.
-  //
   for (int y = 0; y < GRID_SIZE; y++) {
     for (int x = 0; x < GRID_SIZE; x++) {
-      int q = quantize_input_u8_to_model(grid[y][x]);
+      int8_t q = quantize_input_u8_to_model(grid[y][x]);
       input[y][x][0] = q;
     }
   }
@@ -223,13 +203,12 @@ void runCNN(unsigned long preprocessing_us) {
 
   unsigned long inference_us = t1 - t0;
 
-  // temps en millisecondes entières
   unsigned long preprocessing_ms = preprocessing_us / 1000UL;
   unsigned long inference_ms = inference_us / 1000UL;
   unsigned long total_ms = preprocessing_ms + inference_ms;
 
   float probs[10];
-  softmaxFromInt16(output, probs, 10);
+  softmaxFromInt8(output, probs, 10);
 
   int predicted = 0;
   float maxProb = probs[0];
@@ -246,7 +225,7 @@ void runCNN(unsigned long preprocessing_us) {
   sendLine("=========== RESULTAT CNN ===========");
 
   for (int i = 0; i < 10; i++) {
-    int p = (int)roundf(probs[i] * 10000.0f); // pour afficher 2 decimales approx
+    int p = (int)roundf(probs[i] * 10000.0f);
     int integerPart = p / 100;
     int fracPart = p % 100;
 
@@ -342,7 +321,6 @@ void loop() {
       grid[gy][gx] = 255;
     }
 
-    // Petit épaississement du trait en entier
     for (int dy = -1; dy <= 1; dy++) {
       for (int dx = -1; dx <= 1; dx++) {
         int nx = gx + dx;
