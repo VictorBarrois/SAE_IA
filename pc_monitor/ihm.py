@@ -6,10 +6,8 @@ import serial
 import serial.tools.list_ports
 import customtkinter as ctk
 
-
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
-
 
 GRID_SIZE = 28
 TCP_PORT_DEFAULT = "12345"
@@ -34,11 +32,11 @@ class App(ctk.CTk):
         self.current_time = ctk.StringVar(value="0.000000 s")
         self.status_text = ctk.StringVar(value="Déconnecté")
 
-        self.connection_mode = ctk.StringVar(value="Série")
+        self.connection_mode = ctk.StringVar(value="WiFi")
         self.selected_port = ctk.StringVar(value="")
         self.selected_baud = ctk.StringVar(value="115200")
 
-        self.wifi_host = ctk.StringVar(value="192.168.1.173")
+        self.wifi_host = ctk.StringVar(value="192.168.4.1")
         self.wifi_port = ctk.StringVar(value=TCP_PORT_DEFAULT)
 
         self.prob_labels = []
@@ -46,6 +44,7 @@ class App(ctk.CTk):
 
         self.grid_data = [[0.0 for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
         self.grid_rects = [[None for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
         self.collecting_grid = False
         self.current_grid_lines = []
 
@@ -61,11 +60,14 @@ class App(ctk.CTk):
         # ---------------- Top frame ----------------
         top_frame = ctk.CTkFrame(self)
         top_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=16, pady=16)
+
         for i in range(12):
             top_frame.grid_columnconfigure(i, weight=1)
 
         ctk.CTkLabel(
-            top_frame, text="Mode", font=ctk.CTkFont(size=16, weight="bold")
+            top_frame,
+            text="Mode",
+            font=ctk.CTkFont(size=16, weight="bold")
         ).grid(row=0, column=0, padx=8, pady=8, sticky="w")
 
         self.mode_menu = ctk.CTkOptionMenu(
@@ -77,7 +79,9 @@ class App(ctk.CTk):
         self.mode_menu.grid(row=0, column=1, padx=8, pady=8, sticky="ew")
 
         ctk.CTkLabel(
-            top_frame, text="Port série", font=ctk.CTkFont(size=16, weight="bold")
+            top_frame,
+            text="Port série",
+            font=ctk.CTkFont(size=16, weight="bold")
         ).grid(row=0, column=2, padx=8, pady=8, sticky="w")
 
         self.port_menu = ctk.CTkOptionMenu(top_frame, variable=self.selected_port, values=[""])
@@ -87,7 +91,9 @@ class App(ctk.CTk):
         self.refresh_button.grid(row=0, column=4, padx=8, pady=8)
 
         ctk.CTkLabel(
-            top_frame, text="Baudrate", font=ctk.CTkFont(size=16, weight="bold")
+            top_frame,
+            text="Baudrate",
+            font=ctk.CTkFont(size=16, weight="bold")
         ).grid(row=0, column=5, padx=8, pady=8, sticky="w")
 
         self.baud_menu = ctk.CTkOptionMenu(
@@ -98,14 +104,18 @@ class App(ctk.CTk):
         self.baud_menu.grid(row=0, column=6, padx=8, pady=8, sticky="ew")
 
         ctk.CTkLabel(
-            top_frame, text="IP ESP32", font=ctk.CTkFont(size=16, weight="bold")
+            top_frame,
+            text="IP ESP32",
+            font=ctk.CTkFont(size=16, weight="bold")
         ).grid(row=1, column=0, padx=8, pady=8, sticky="w")
 
         self.ip_entry = ctk.CTkEntry(top_frame, textvariable=self.wifi_host)
         self.ip_entry.grid(row=1, column=1, padx=8, pady=8, sticky="ew")
 
         ctk.CTkLabel(
-            top_frame, text="Port TCP", font=ctk.CTkFont(size=16, weight="bold")
+            top_frame,
+            text="Port TCP",
+            font=ctk.CTkFont(size=16, weight="bold")
         ).grid(row=1, column=2, padx=8, pady=8, sticky="w")
 
         self.tcp_port_entry = ctk.CTkEntry(top_frame, textvariable=self.wifi_port)
@@ -121,9 +131,7 @@ class App(ctk.CTk):
         )
         self.status_label.grid(row=1, column=5, columnspan=4, padx=8, pady=8, sticky="ew")
 
-        wifi_info = (
-            "WiFi salle : SSID = ESP32_IA_PROJECT | Mot de passe = GeiiTailscale2024$"
-        )
+        wifi_info = "WiFi carte : SSID = ESP32_IA_PROJECT | Mot de passe = GeiiTailscale2024$ | IP = 192.168.4.1 | Port = 12345"
         ctk.CTkLabel(
             top_frame,
             text=wifi_info,
@@ -145,41 +153,29 @@ class App(ctk.CTk):
         self.digit_card.grid_columnconfigure((0, 1, 2), weight=1)
 
         ctk.CTkLabel(
-            self.digit_card,
-            text="Chiffre reconnu",
-            font=ctk.CTkFont(size=18, weight="bold")
+            self.digit_card, text="Chiffre reconnu", font=ctk.CTkFont(size=18, weight="bold")
         ).grid(row=0, column=0, padx=12, pady=(16, 6), sticky="w")
 
         ctk.CTkLabel(
-            self.digit_card,
-            text="Confiance",
-            font=ctk.CTkFont(size=18, weight="bold")
+            self.digit_card, text="Confiance", font=ctk.CTkFont(size=18, weight="bold")
         ).grid(row=0, column=1, padx=12, pady=(16, 6), sticky="w")
 
         ctk.CTkLabel(
-            self.digit_card,
-            text="Temps inférence",
-            font=ctk.CTkFont(size=18, weight="bold")
+            self.digit_card, text="Temps inférence", font=ctk.CTkFont(size=18, weight="bold")
         ).grid(row=0, column=2, padx=12, pady=(16, 6), sticky="w")
 
         self.digit_value = ctk.CTkLabel(
-            self.digit_card,
-            textvariable=self.current_digit,
-            font=ctk.CTkFont(size=84, weight="bold")
+            self.digit_card, textvariable=self.current_digit, font=ctk.CTkFont(size=84, weight="bold")
         )
         self.digit_value.grid(row=1, column=0, padx=12, pady=(0, 18), sticky="n")
 
         self.conf_value = ctk.CTkLabel(
-            self.digit_card,
-            textvariable=self.current_conf,
-            font=ctk.CTkFont(size=34, weight="bold")
+            self.digit_card, textvariable=self.current_conf, font=ctk.CTkFont(size=34, weight="bold")
         )
         self.conf_value.grid(row=1, column=1, padx=12, pady=(0, 18), sticky="n")
 
         self.time_value = ctk.CTkLabel(
-            self.digit_card,
-            textvariable=self.current_time,
-            font=ctk.CTkFont(size=28, weight="bold")
+            self.digit_card, textvariable=self.current_time, font=ctk.CTkFont(size=28, weight="bold")
         )
         self.time_value.grid(row=1, column=2, padx=12, pady=(0, 18), sticky="n")
 
@@ -193,11 +189,7 @@ class App(ctk.CTk):
         grid_frame.grid_columnconfigure(0, weight=1)
 
         self.grid_canvas = ctk.CTkCanvas(
-            grid_frame,
-            width=420,
-            height=420,
-            bg="#d9d9d9",
-            highlightthickness=0
+            grid_frame, width=420, height=420, bg="#d9d9d9", highlightthickness=0
         )
         self.grid_canvas.grid(row=0, column=0, sticky="nsew", padx=12, pady=12)
 
@@ -225,10 +217,7 @@ class App(ctk.CTk):
 
         for i in range(10):
             label = ctk.CTkLabel(
-                probs_container,
-                text=f"{i}",
-                width=30,
-                font=ctk.CTkFont(size=18, weight="bold")
+                probs_container, text=f"{i}", width=30, font=ctk.CTkFont(size=18, weight="bold")
             )
             label.grid(row=i, column=0, padx=(12, 8), pady=8, sticky="w")
 
@@ -276,10 +265,9 @@ class App(ctk.CTk):
                 y0 = y * cell
                 x1 = x0 + cell
                 y1 = y0 + cell
+
                 rect = self.grid_canvas.create_rectangle(
-                    x0, y0, x1, y1,
-                    fill="#ffffff",
-                    outline="#cfcfcf"
+                    x0, y0, x1, y1, fill="#ffffff", outline="#cfcfcf"
                 )
                 self.grid_rects[y][x] = rect
 
@@ -305,7 +293,9 @@ class App(ctk.CTk):
         ports = [p.device for p in serial.tools.list_ports.comports()]
         if not ports:
             ports = ["Aucun port détecté"]
+
         self.port_menu.configure(values=ports)
+
         if ports[0] != "Aucun port détecté":
             self.selected_port.set(ports[0])
         else:
@@ -395,6 +385,7 @@ class App(ctk.CTk):
 
         self.serial_port = None
         self.tcp_socket = None
+
         self.status_text.set("Déconnecté")
         self.connect_button.configure(text="Connecter")
         self.append_log("Connexion fermée.")
@@ -411,6 +402,7 @@ class App(ctk.CTk):
 
     def read_wifi_loop(self):
         buffer = ""
+
         while self.running and self.tcp_socket:
             try:
                 data = self.tcp_socket.recv(4096)
@@ -419,11 +411,13 @@ class App(ctk.CTk):
                     break
 
                 buffer += data.decode("utf-8", errors="ignore")
+
                 while "\n" in buffer:
                     line, buffer = buffer.split("\n", 1)
                     line = line.strip()
                     if line:
                         self.queue.put(line)
+
             except socket.timeout:
                 continue
             except Exception as e:
@@ -435,6 +429,7 @@ class App(ctk.CTk):
             line = self.queue.get()
             self.append_log(line)
             self.parse_line(line)
+
         self.after(100, self.process_queue)
 
     def append_log(self, text):
@@ -460,6 +455,7 @@ class App(ctk.CTk):
         if len(self.current_grid_lines) == GRID_SIZE:
             self.grid_data = self.current_grid_lines
             self.update_grid_canvas()
+
         self.current_grid_lines = []
         self.collecting_grid = False
 
